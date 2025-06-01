@@ -2,6 +2,11 @@
 
 A modern task management application with a clean and intuitive dashboard interface.
 
+## Live Demo
+
+- Frontend: [TaskFlow App](https://task-flow-five-xi.vercel.app/)
+- Backend: [API Server](https://taskflow-backend.onrender.com) (Deployed on Render)
+
 ## Features
 
 - **Modern Dashboard**: Clean and intuitive interface with task statistics
@@ -24,7 +29,20 @@ A modern task management application with a clean and intuitive dashboard interf
 - MongoDB
 - JWT Authentication
 
-## Getting Started
+## Deployment
+
+### Frontend Deployment
+- Deployed on [Vercel](https://task-flow-five-xi.vercel.app/)
+- Automatic deployments from the main branch
+- Optimized for production with static file serving
+
+### Backend Deployment
+- Hosted on [Render](https://taskflow-backend.onrender.com)
+- Auto-scaling and high availability
+- Secure HTTPS endpoints
+- Environment variables managed through Render dashboard
+
+## Local Development
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -58,6 +76,14 @@ JWT_SECRET=your_jwt_secret
 PORT=5001
 ```
 
+For local development, update the API base URL in the frontend to point to your local backend:
+```javascript
+// In client/src/config.js or similar
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://taskflow-backend.onrender.com'
+  : 'http://localhost:5001';
+```
+
 4. Start the application
 ```bash
 # Start backend server
@@ -69,7 +95,7 @@ cd client
 npm start
 ```
 
-The application will be available at `http://localhost:3000`
+The application will be available at `http://localhost:3000` for local development.
 
 ## Features in Detail
 
