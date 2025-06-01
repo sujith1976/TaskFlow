@@ -1,0 +1,14 @@
+{
+  "name": "taskflow",
+  "version": "1.0.0",
+  "description": "TaskFlow - Task Management Application",
+  "scripts": {
+    "install-server": "cd server && npm install",
+    "build-server": "cd server && npm run build",
+    "start-server": "cd server && npm start",
+    "deploy": "npm run install-server && npm run build-server && npm run start-server"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
