@@ -5,7 +5,7 @@ A modern task management application with a clean and intuitive dashboard interf
 ## Live Demo
 
 - Frontend: [TaskFlow App](https://task-flow-five-xi.vercel.app/)
-- Backend: [API Server](https://taskflow-backend.onrender.com) (Deployed on Render)
+- Backend: [API Server](https://taskflows.onrender.com) (Deployed on Render)
 
 ## Features
 
@@ -37,10 +37,22 @@ A modern task management application with a clean and intuitive dashboard interf
 - Optimized for production with static file serving
 
 ### Backend Deployment
-- Hosted on [Render](https://taskflow-backend.onrender.com)
+- Hosted on [Render](https://taskflows.onrender.com)
 - Auto-scaling and high availability
 - Secure HTTPS endpoints
 - Environment variables managed through Render dashboard
+
+#### Render Deployment Settings
+```
+Build Command: cd server && npm install && npm run build
+Start Command: cd server && node src/index.js
+Root Directory: /
+Environment Variables:
+- MONGODB_URI
+- JWT_SECRET
+- PORT (optional, defaults to what Render provides)
+- NODE_ENV=production
+```
 
 ## Local Development
 
