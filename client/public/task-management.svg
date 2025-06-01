@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Background -->
+        <rect fill="#F5F7FA" x="0" y="0" width="800" height="600" rx="20"></rect>
+        
+        <!-- Task Board -->
+        <rect fill="#FFFFFF" x="100" y="100" width="600" height="400" rx="10" stroke="#2196F3" stroke-width="2"></rect>
+        
+        <!-- Column 1 - To Do -->
+        <rect fill="#F8F9FA" x="120" y="140" width="180" height="340" rx="8"></rect>
+        <text font-family="Arial" font-size="16" font-weight="bold" fill="#333333" x="160" y="170">To Do</text>
+        <rect fill="#FFFFFF" x="130" y="190" width="160" height="80" rx="4" stroke="#E0E0E0" stroke-width="1"></rect>
+        <rect fill="#FFFFFF" x="130" y="280" width="160" height="80" rx="4" stroke="#E0E0E0" stroke-width="1"></rect>
+        
+        <!-- Column 2 - In Progress -->
+        <rect fill="#F8F9FA" x="310" y="140" width="180" height="340" rx="8"></rect>
+        <text font-family="Arial" font-size="16" font-weight="bold" fill="#333333" x="350" y="170">In Progress</text>
+        <rect fill="#FFFFFF" x="320" y="190" width="160" height="80" rx="4" stroke="#2196F3" stroke-width="1"></rect>
+        
+        <!-- Column 3 - Done -->
+        <rect fill="#F8F9FA" x="500" y="140" width="180" height="340" rx="8"></rect>
+        <text font-family="Arial" font-size="16" font-weight="bold" fill="#333333" x="540" y="170">Done</text>
+        <rect fill="#FFFFFF" x="510" y="190" width="160" height="80" rx="4" stroke="#4CAF50" stroke-width="1"></rect>
+        <rect fill="#FFFFFF" x="510" y="280" width="160" height="80" rx="4" stroke="#4CAF50" stroke-width="1"></rect>
+        
+        <!-- Task Details -->
+        <circle fill="#2196F3" cx="150" cy="220" r="6"></circle>
+        <circle fill="#2196F3" cx="150" cy="310" r="6"></circle>
+        <circle fill="#2196F3" cx="340" cy="220" r="6"></circle>
+        <circle fill="#4CAF50" cx="530" cy="220" r="6"></circle>
+        <circle fill="#4CAF50" cx="530" cy="310" r="6"></circle>
+    </g>
+</svg> 
