@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Task.css';
-
-const API_BASE_URL = 'http://localhost:5001/api';
+import { API_URL } from '../config/api';
 
 const Task = ({ task, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -12,7 +11,7 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleStatusChange = async (newStatus) => {
     try {
       setError('');
-      const response = await axios.put(`${API_BASE_URL}/tasks/${task._id}`, {
+      const response = await axios.put(`${API_URL}/tasks/${task._id}`, {
         ...task,
         status: newStatus
       }, {
@@ -31,7 +30,7 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleSave = async () => {
     try {
       setError('');
-      const response = await axios.put(`${API_BASE_URL}/tasks/${task._id}`, 
+      const response = await axios.put(`${API_URL}/tasks/${task._id}`, 
         {
           title: editedTask.title,
           description: editedTask.description,
@@ -57,7 +56,7 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleDelete = async () => {
     try {
       setError('');
-      await axios.delete(`${API_BASE_URL}/tasks/${task._id}`, {
+      await axios.delete(`${API_URL}/tasks/${task._id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

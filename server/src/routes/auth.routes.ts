@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import User from '../models/user.model';
 
 const router = express.Router();
 
@@ -18,33 +19,32 @@ const loginSchema = z.object({
   password: z.string()
 });
 
-// Mock user storage (replace with actual database later)
-const users: { username: string; email: string; password: string }[] = [];
-
 // Routes
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, email, password } = registerSchema.parse(req.body);
     
     // Check if user already exists
-    const userExists = users.some(user => user.email === email);
+    const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ error: 'User already exists' });
+      res.status(400).json({ error: 'User already exists' });
+      return;
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Store user (replace with database operation later)
-    users.push({
+    // Create and save new user
+    const user = new User({
       username,
       email,
       password: hashedPassword
     });
+    await user.save();
 
     // Generate JWT token
     const token = jwt.sign(
-      { email, username },
+      { userId: user._id, email, username },
       process.env.JWT_SECRET || 'default_secret',
       { expiresIn: '24h' }
     );
@@ -55,29 +55,32 @@ router.post('/register', async (req: Request, res: Response) => {
       user: { username, email }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(400).json({ error: 'Invalid input data' });
   }
 });
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = loginSchema.parse(req.body);
     
-    // Find user (replace with database query later)
-    const user = users.find(u => u.email === email);
+    // Find user
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { email: user.email, username: user.username },
+      { userId: user._id, email: user.email, username: user.username },
       process.env.JWT_SECRET || 'default_secret',
       { expiresIn: '24h' }
     );
@@ -88,6 +91,7 @@ router.post('/login', async (req: Request, res: Response) => {
       user: { username: user.username, email: user.email }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(400).json({ error: 'Invalid credentials' });
   }
 });

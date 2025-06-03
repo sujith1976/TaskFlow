@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaChartLine, FaCog, FaUserCircle, FaTasks } from 'react-icons/fa';
 import Task from './Task';
 import './TaskList.css';
-
-const API_BASE_URL = 'http://localhost:5001/api';
+import { API_URL } from '../config/api';
 
 const TaskList = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState({ 
-    title: '', 
-    description: '', 
-    dueDate: new Date().toISOString().split('T')[0],
-    priority: 'medium',
-    status: 'todo'
-  });
+  const [activeMenu, setActiveMenu] = useState('tasks');
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState('');
+  const [showTaskForm, setShowTaskForm] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -25,7 +22,7 @@ const TaskList = () => {
   const fetchTasks = async () => {
     try {
       setError('');
-      const response = await axios.get(`${API_BASE_URL}/tasks`, {
+      const response = await axios.get(`${API_URL}/tasks`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -39,37 +36,23 @@ const TaskList = () => {
     }
   };
 
-  const handleCreateTask = async (e) => {
-    e.preventDefault();
-    try {
-      setError('');
-      const response = await axios.post(`${API_BASE_URL}/tasks`, 
-        {
-          title: newTask.title,
-          description: newTask.description,
-          dueDate: newTask.dueDate,
-          priority: newTask.priority,
-          status: 'todo'
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      setTasks([...tasks, response.data]);
-      setNewTask({ 
-        title: '', 
-        description: '', 
-        dueDate: new Date().toISOString().split('T')[0],
-        priority: 'medium',
-        status: 'todo'
-      });
-    } catch (error) {
-      console.error('Error creating task:', error);
-      setError(error.response?.data?.message || 'Failed to create task. Please try again.');
+  const handleMenuClick = (menu) => {
+    setActiveMenu(menu);
+    switch (menu) {
+      case 'overview':
+        navigate('/dashboard');
+        break;
+      case 'tasks':
+        navigate('/tasks');
+        break;
+      case 'settings':
+        // Add settings route when implemented
+        break;
+      case 'profile':
+        // Add profile route when implemented
+        break;
+      default:
+        break;
     }
   };
 
@@ -88,11 +71,11 @@ const TaskList = () => {
     const today = new Date().toISOString().split('T')[0];
     switch (filter) {
       case 'today':
-        return tasks.filter(task => task.dueDate === today);
+        return tasks.filter(task => task.date === today);
       case 'upcoming':
-        return tasks.filter(task => task.dueDate > today);
+        return tasks.filter(task => task.date > today);
       case 'past':
-        return tasks.filter(task => task.dueDate < today);
+        return tasks.filter(task => task.date < today);
       default:
         return tasks;
     }
@@ -102,72 +85,51 @@ const TaskList = () => {
     return <div className="loading">Loading tasks...</div>;
   }
 
+  // Group tasks by status
+  const tasksByStatus = {
+    todo: filterTasks(tasks).filter(task => task.status === 'todo'),
+    inProgress: filterTasks(tasks).filter(task => task.status === 'in-progress'),
+    completed: filterTasks(tasks).filter(task => task.status === 'completed')
+  };
+
   return (
-    <div className="task-list-container">
-      <div className="create-task-section">
-        <h2>Create New Task</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleCreateTask} className="create-task-form">
-          <div className="form-group">
-            <label htmlFor="title">Title</label>
-            <input
-              id="title"
-              type="text"
-              placeholder="Task Title"
-              value={newTask.title}
-              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-              required
-              className="task-input"
-            />
-          </div>
+    <div className="dashboard-container">
+      <div className="dashboard-sidebar">
+        <div className="sidebar-header">
+          <h1>TaskFlow</h1>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              placeholder="Task Description"
-              value={newTask.description}
-              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-              className="task-textarea"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="date">Due Date</label>
-              <input
-                id="date"
-                type="date"
-                value={newTask.dueDate}
-                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                min={new Date().toISOString().split('T')[0]}
-                required
-                className="task-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="priority">Priority</label>
-              <select
-                id="priority"
-                value={newTask.priority}
-                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                className="task-input"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" className="create-task-btn">Create Task</button>
-        </form>
+        <div className="sidebar-menu">
+          <button 
+            className={`menu-item ${activeMenu === 'overview' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('overview')}
+          >
+            <FaChartLine /> Overview
+          </button>
+          <button 
+            className={`menu-item ${activeMenu === 'tasks' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('tasks')}
+          >
+            <FaTasks /> Tasks
+          </button>
+          <button 
+            className={`menu-item ${activeMenu === 'settings' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('settings')}
+          >
+            <FaCog /> Settings
+          </button>
+          <button 
+            className={`menu-item ${activeMenu === 'profile' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('profile')}
+          >
+            <FaUserCircle /> Profile
+          </button>
+        </div>
       </div>
 
-      <div className="tasks-section">
+      <div className="dashboard-main">
         <div className="tasks-header">
-          <h2>Your Tasks</h2>
+          <h2>Task Management</h2>
           <div className="task-filters">
             <button 
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
@@ -199,44 +161,35 @@ const TaskList = () => {
         <div className="task-status-columns">
           <div className="task-column">
             <h3>To Do</h3>
-            {filterTasks(tasks)
-              .filter(task => task.status === 'todo')
-              .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-              .map(task => (
-                <Task
-                  key={task._id}
-                  task={task}
-                  onUpdate={handleUpdateTask}
-                  onDelete={handleDeleteTask}
-                />
+            {tasksByStatus.todo.map(task => (
+              <Task
+                key={task._id}
+                task={task}
+                onUpdate={handleUpdateTask}
+                onDelete={handleDeleteTask}
+              />
             ))}
           </div>
           <div className="task-column">
             <h3>In Progress</h3>
-            {filterTasks(tasks)
-              .filter(task => task.status === 'in-progress')
-              .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-              .map(task => (
-                <Task
-                  key={task._id}
-                  task={task}
-                  onUpdate={handleUpdateTask}
-                  onDelete={handleDeleteTask}
-                />
+            {tasksByStatus.inProgress.map(task => (
+              <Task
+                key={task._id}
+                task={task}
+                onUpdate={handleUpdateTask}
+                onDelete={handleDeleteTask}
+              />
             ))}
           </div>
           <div className="task-column">
             <h3>Completed</h3>
-            {filterTasks(tasks)
-              .filter(task => task.status === 'completed')
-              .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-              .map(task => (
-                <Task
-                  key={task._id}
-                  task={task}
-                  onUpdate={handleUpdateTask}
-                  onDelete={handleDeleteTask}
-                />
+            {tasksByStatus.completed.map(task => (
+              <Task
+                key={task._id}
+                task={task}
+                onUpdate={handleUpdateTask}
+                onDelete={handleDeleteTask}
+              />
             ))}
           </div>
         </div>

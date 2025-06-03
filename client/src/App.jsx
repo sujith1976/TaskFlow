@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import TaskList from './components/TaskList';
+import TaskForm from './components/TaskForm';
 import Dashboard from './components/Dashboard';
 import './App.css';
 
@@ -33,6 +34,22 @@ const App = () => {
             element={
               <PrivateRoute>
                 <TaskList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tasks/new"
+            element={
+              <PrivateRoute>
+                <TaskForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tasks/edit/:taskId"
+            element={
+              <PrivateRoute>
+                <TaskForm />
               </PrivateRoute>
             }
           />
