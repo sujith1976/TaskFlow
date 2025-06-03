@@ -8,8 +8,9 @@ import {
 } from 'react-icons/fa';
 import './Dashboard.css';
 import MeetingForm from './MeetingForm';
+import config from '../config/config';
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = config.apiUrl;
 
 const Dashboard = () => {
   const navigate = useNavigate();
