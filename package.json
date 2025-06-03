@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "TaskFlow - Task Management Application",  "scripts": {
     "start": "cd server && npm start",
-    "install-deps": "npm install && cd client && npm install && cd ../server && npm install",
-    "build": "cd client && npm run build && cd ../server && npm run build",
-    "deploy": "npm run install-deps && npm run build && npm start"
+    "install-deps": "npm install && cd client && npm install --legacy-peer-deps && cd ../server && npm install",
+    "build": "cd client && npm install --legacy-peer-deps && npm run build && cd ../server && npm install && npm run build",
+    "deploy": "npm run build && npm start"
   },
   "engines": {
     "node": ">=14.0.0"
