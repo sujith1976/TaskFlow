@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Task from '../models/task.model';
-import { sendTaskReminder } from '../utils/email';
 
 // Extend Request type to include user
 interface AuthRequest extends Request {
@@ -19,14 +18,20 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     const userEmail = req.user.email;
     const taskData = { ...req.body, userId };
 
-    const task = new Task(taskData);
-    await task.save();
+    console.log('Creating task with data:', JSON.stringify(taskData, null, 2));
 
-    // Schedule reminder if startTime is set
-    if (task.startTime) {
-      const reminderTime = new Date(task.startTime);
-      reminderTime.setMinutes(reminderTime.getMinutes() - 30);
-      sendTaskReminder(userEmail, task.title, task.startTime);
+    const task = new Task(taskData);
+    try {
+      await task.save();
+    } catch (saveError: any) {
+      console.error('Task save error:', saveError);
+      if (saveError.message.includes('time slot overlaps')) {
+        return res.status(400).json({ message: 'Task cannot be scheduled: time slot overlaps with another task' });
+      }
+      if (saveError.message.includes('End time must be after start time')) {
+        return res.status(400).json({ message: 'End time must be after start time' });
+      }
+      throw saveError;
     }
 
     return res.status(201).json(task);
@@ -45,9 +50,26 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     const userEmail = req.user.email;
     const taskId = req.params.id;
 
+    console.log('Updating task:', { taskId, userId, data: req.body });
+
     const task = await Task.findOne({ _id: taskId, userId });
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Validate date and time formats
+    const { startTime, endTime } = req.body;
+    if (startTime && endTime) {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({ message: 'Invalid date or time format' });
+      }
+      
+      if (start >= end) {
+        return res.status(400).json({ message: 'End time must be after start time' });
+      }
     }
 
     const updatedTask = await Task.findByIdAndUpdate(
@@ -55,13 +77,6 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
       { ...req.body },
       { new: true }
     );
-
-    // Update reminder if startTime is changed
-    if (updatedTask && updatedTask.startTime && task.startTime !== updatedTask.startTime) {
-      const reminderTime = new Date(updatedTask.startTime);
-      reminderTime.setMinutes(reminderTime.getMinutes() - 30);
-      sendTaskReminder(userEmail, updatedTask.title, updatedTask.startTime);
-    }
 
     return res.json(updatedTask);
   } catch (error) {

@@ -63,8 +63,7 @@ const taskSchema = new mongoose_1.Schema({
         type: String,
         enum: ['todo', 'in-progress', 'completed'],
         default: 'todo'
-    },
-    userId: {
+    }, userId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
@@ -76,16 +75,6 @@ taskSchema.pre('save', async function (next) {
     if (this.startTime && this.endTime) {
         if (this.startTime >= this.endTime) {
             throw new Error('End time must be after start time');
-        }
-        const TaskModel = this.constructor;
-        const overlappingTask = await TaskModel.findOne({
-            _id: { $ne: this._id },
-            userId: this.userId,
-            startTime: { $lt: this.endTime },
-            endTime: { $gt: this.startTime }
-        });
-        if (overlappingTask) {
-            throw new Error('Task time slot overlaps with another task');
         }
     }
     next();

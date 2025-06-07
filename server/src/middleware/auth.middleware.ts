@@ -17,10 +17,8 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const authHeader = req.header('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const decoded = jwt.verify(token, 'your_jwt_secret') as { userId: string }; // In production, use environment variable
+    }    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret') as { userId: string };
     const user = await User.findOne({ _id: decoded.userId }) as (Document & IUser) | null;
 
     if (!user) {

@@ -1,10 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const projectRoutes = require('./routes/projectRoutes');
-const meetingRoutes = require('./routes/meetingRoutes');
-const taskRoutes = require('./routes/task.routes');
+const authRoutes = require('./routes/auth.routes').default;
+const meetingRoutes = require('./routes/meeting.routes').default;
+const taskRoutes = require('./routes/task.routes').default;
 
 const app = express();
 
@@ -14,7 +13,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/projects', projectRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/tasks', taskRoutes);
 
@@ -32,7 +30,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

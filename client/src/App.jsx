@@ -10,6 +10,7 @@ import './App.css';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
+  console.log('PrivateRoute - token:', token ? 'exists' : 'not found');
   return token ? children : <Navigate to="/login" />;
 };
 

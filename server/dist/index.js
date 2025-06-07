@@ -13,7 +13,7 @@ const task_routes_1 = __importDefault(require("./routes/task.routes"));
 const meeting_routes_1 = __importDefault(require("./routes/meeting.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)('dev'));
 app.use(express_1.default.json());

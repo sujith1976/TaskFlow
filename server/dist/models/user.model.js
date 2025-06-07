@@ -32,8 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userSchema = new mongoose_1.Schema({
     username: {
         type: String,
@@ -59,5 +64,31 @@ const userSchema = new mongoose_1.Schema({
         default: Date.now
     }
 });
-exports.default = mongoose_1.default.model('User', userSchema);
+userSchema.pre('save', async function (next) {
+    const user = this;
+    if (user.isModified('password')) {
+        user.password = await bcryptjs_1.default.hash(user.password, 10);
+    }
+    next();
+});
+userSchema.methods.generateAuthToken = function () {
+    const token = jsonwebtoken_1.default.sign({ userId: this._id, email: this.email, username: this.username }, process.env.JWT_SECRET || 'default_secret', { expiresIn: '24h' });
+    return token;
+};
+userSchema.methods.comparePassword = async function (password) {
+    return bcryptjs_1.default.compare(password, this.password);
+};
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error('Invalid login credentials');
+    }
+    const isMatch = await bcryptjs_1.default.compare(password, user.password);
+    if (!isMatch) {
+        throw new Error('Invalid login credentials');
+    }
+    return user;
+};
+const User = mongoose_1.default.model('User', userSchema);
+exports.default = User;
 //# sourceMappingURL=user.model.js.map

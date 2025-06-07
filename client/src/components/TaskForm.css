@@ -1,6 +1,6 @@
 .task-form-page {
   min-height: 100vh;
-  background: var(--bg-primary);
+  background: var(--bg-primary, #f8f9fa);
   padding: 2rem;
 }
 
@@ -16,7 +16,7 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary, #2c3e50);
 }
 
 .back-button {
@@ -24,26 +24,26 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-color, #e0e0e0);
   border-radius: 12px;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #64748b);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  background: var(--hover-bg);
-  color: var(--primary-color);
+  background: var(--hover-bg, #f1f5f9);
+  color: var(--primary-color, #2196F3);
 }
 
 .task-form-container {
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--bg-secondary);
+  background: var(--bg-secondary, #ffffff);
   border-radius: 24px;
-  box-shadow: 0px 2px 5.5px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .task-form-content {
@@ -60,16 +60,17 @@
 }
 
 .form-section {
-  background: var(--bg-primary);
+  background: var(--bg-primary, #f8f9fa);
   padding: 2rem;
   border-radius: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
 }
 
 .form-section h2 {
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-primary, #2c3e50);
 }
 
 .form-group {
@@ -92,12 +93,12 @@
 .form-group label span {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-primary, #2c3e50);
 }
 
 .form-group label small {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #64748b);
 }
 
 .input-with-icon {
@@ -109,7 +110,7 @@
 .input-with-icon svg {
   position: absolute;
   left: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #64748b);
   font-size: 1rem;
 }
 
@@ -122,10 +123,10 @@
 .form-group textarea,
 .form-group select {
   padding: 0.875rem 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color, #e0e0e0);
   border-radius: 12px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: var(--bg-secondary, #ffffff);
+  color: var(--text-primary, #2c3e50);
   font-size: 0.95rem;
   transition: all 0.2s ease;
   width: 100%;
@@ -135,8 +136,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1);
+  border-color: var(--primary-color, #2196F3);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .form-group textarea {
@@ -155,8 +156,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 82, 82, 0.1);
-  color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color, #ef4444);
   border-radius: 12px;
   font-size: 0.9rem;
 }
@@ -183,24 +184,24 @@
 }
 
 .cancel-button {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  background: var(--bg-primary, #f8f9fa);
+  border: 1px solid var(--border-color, #e0e0e0);
+  color: var(--text-secondary, #64748b);
 }
 
 .cancel-button:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
+  background: var(--hover-bg, #f1f5f9);
+  color: var(--text-primary, #2c3e50);
 }
 
 .submit-button {
-  background: var(--primary-color);
+  background: var(--primary-color, #2196F3);
   border: none;
   color: white;
 }
 
 .submit-button:hover {
-  background: var(--primary-light);
+  background: var(--primary-dark, #1976D2);
   transform: translateY(-1px);
 }
 
@@ -211,28 +212,33 @@
 }
 
 .sidebar-section {
-  background: var(--bg-primary);
+  background: var(--bg-primary, #f8f9fa);
   padding: 1.5rem;
   border-radius: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
 }
 
 .sidebar-section h3 {
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-primary, #2c3e50);
 }
 
 .sidebar-section ul {
   margin: 0;
   padding: 0 0 0 1.25rem;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #64748b);
   font-size: 0.9rem;
   line-height: 1.6;
 }
 
 .sidebar-section li {
   margin-bottom: 0.5rem;
+}
+
+.sidebar-section li:last-child {
+  margin-bottom: 0;
 }
 
 .priority-guide {
@@ -246,7 +252,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #64748b);
 }
 
 .priority-dot {
@@ -257,77 +263,15 @@
 }
 
 .priority-dot.high {
-  background: var(--danger-color);
+  background: var(--danger-color, #ef4444);
 }
 
 .priority-dot.medium {
-  background: var(--warning-color);
+  background: var(--warning-color, #f59e0b);
 }
 
 .priority-dot.low {
-  background: var(--success-color);
-}
-
-.schedule-section {
-  background: var(--bg-primary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-}
-
-.schedule-section h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.schedule-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.time-group {
-  grid-column: 1 / -1;
-}
-
-.icon-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.schedule-icon {
-  color: var(--primary-color);
-  font-size: 1.1rem;
-}
-
-.time-pickers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.date-group input,
-.priority-group select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-}
-
-.date-group input:focus,
-.priority-group select:focus {
-  border-color: var(--primary-color);
-  outline: none;
+  background: var(--success-color, #10b981);
 }
 
 /* Dark mode specific styles */
@@ -366,4 +310,13 @@
   .form-sidebar {
     grid-template-columns: 1fr;
   }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
 }

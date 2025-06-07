@@ -46,32 +46,64 @@ const TaskForm = () => {
     e.preventDefault();
     setError('');
 
-    // Validate all fields are filled
-    if (!task.title || !task.description || !task.date || !task.startTime || !task.endTime) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    // Validate time slots
-    const startMinutes = timeToMinutes(task.startTime);
-    const endMinutes = timeToMinutes(task.endTime);
-    
-    if (endMinutes <= startMinutes) {
-      setError('End time must be after start time');
-      return;
-    }
-
     try {
-      if (taskId) {
-        await axiosInstance.put(`/tasks/${taskId}`, task);
-      } else {
-        await axiosInstance.post('/tasks', task);
+      // Validate all fields are filled
+      if (!task.title?.trim()) {
+        setError('Please enter a task title');
+        return;
       }
-      navigate('/dashboard');
+      if (!task.description?.trim()) {
+        setError('Please enter a task description');
+        return;
+      }
+      if (!task.date || !task.startTime || !task.endTime) {
+        setError('Please set the date and time for the task');
+        return;
+      }
+
+      // Convert times to proper ISO format
+      const startDateTime = new Date(`${task.date}T${task.startTime}`);
+      const endDateTime = new Date(`${task.date}T${task.endTime}`);
+      
+      if (endDateTime <= startDateTime) {
+        setError('End time must be after start time');
+        return;
+      }
+
+      const taskData = {
+        ...task,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString()
+      };
+
+      if (taskId) {
+        // Update existing task
+        const response = await axiosInstance.put(`/tasks/${taskId}`, taskData);
+        if (response.data) {
+          navigate('/dashboard');
+        }
+      } else {
+        // Create new task
+        const response = await axiosInstance.post('/tasks', taskData);
+        if (response.data) {
+          navigate('/dashboard');
+        }
+      }
     } catch (error) {
       console.error('Error saving task:', error);
-      setError('Failed to save task. Please try again.');
-      setLoading(false);
+      let errorMessage = 'Failed to save task. Please try again.';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Invalid task data. Please check all fields.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Session expired. Please log in again.';
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -96,6 +128,8 @@ const TaskForm = () => {
       <div className="task-form-container">
         <div className="task-form-content">
           <form onSubmit={handleSubmit} className="task-form">
+            {error && <div className="error-message"><FaExclamationCircle /> {error}</div>}
+
             <div className="form-section">
               <h2>Basic Information</h2>
               <div className="form-group">
@@ -109,6 +143,7 @@ const TaskForm = () => {
                   value={task.title}
                   onChange={(e) => setTask({ ...task, title: e.target.value })}
                   placeholder="Enter task title"
+                  required
                 />
               </div>
 
@@ -123,6 +158,7 @@ const TaskForm = () => {
                   onChange={(e) => setTask({ ...task, description: e.target.value })}
                   placeholder="Enter task description"
                   rows="4"
+                  required
                 />
               </div>
             </div>
@@ -143,6 +179,7 @@ const TaskForm = () => {
                       value={task.date}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setTask({ ...task, date: e.target.value })}
+                      required
                     />
                   </div>
                 </div>
@@ -180,6 +217,7 @@ const TaskForm = () => {
                       id="startTime"
                       value={task.startTime}
                       onChange={(e) => setTask({ ...task, startTime: e.target.value })}
+                      required
                     />
                   </div>
                 </div>
@@ -196,18 +234,12 @@ const TaskForm = () => {
                       id="endTime"
                       value={task.endTime}
                       onChange={(e) => setTask({ ...task, endTime: e.target.value })}
+                      required
                     />
                   </div>
                 </div>
               </div>
             </div>
-
-            {error && (
-              <div className="error-message">
-                <FaExclamationCircle />
-                {error}
-              </div>
-            )}
 
             <div className="form-actions">
               <button type="button" className="cancel-button" onClick={() => navigate('/dashboard')}>
@@ -223,12 +255,14 @@ const TaskForm = () => {
             <div className="sidebar-section">
               <h3>Tips</h3>
               <ul>
-                <li>Be specific with your task title</li>
-                <li>Set realistic time frames</li>
-                <li>Add detailed descriptions for clarity</li>
-                <li>Choose appropriate priority levels</li>
+                <li>Be specific with your task title for better organization</li>
+                <li>Set realistic time frames to ensure completion</li>
+                <li>Add detailed descriptions to help you remember important details</li>
+                <li>Use priority levels to manage your workload effectively</li>
+                <li>Break down complex tasks into smaller, manageable sub-tasks</li>
               </ul>
             </div>
+
             <div className="sidebar-section">
               <h3>Priority Guide</h3>
               <div className="priority-guide">
@@ -245,6 +279,16 @@ const TaskForm = () => {
                   <span>Low - Tasks that can be done when time permits</span>
                 </div>
               </div>
+            </div>
+
+            <div className="sidebar-section">
+              <h3>Best Practices</h3>
+              <ul>
+                <li>Review and update task status regularly</li>
+                <li>Schedule breaks between tasks</li>
+                <li>Set clear goals and milestones</li>
+                <li>Keep task descriptions concise but informative</li>
+              </ul>
             </div>
           </div>
         </div>

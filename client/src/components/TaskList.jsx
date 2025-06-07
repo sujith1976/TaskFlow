@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { FaChartLine, FaCog, FaUserCircle, FaTasks } from 'react-icons/fa';
+import { FaChartLine, FaTasks, FaBell, FaChartBar } from 'react-icons/fa';
 import Task from './Task';
+import Analytics from './Analytics';
 import './TaskList.css';
-import { API_URL } from '../config/api';
+import axiosInstance from '../config/axios';
 
 const TaskList = () => {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const TaskList = () => {
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState('');
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [meetings, setMeetings] = useState([]);
 
   useEffect(() => {
     fetchTasks();
@@ -21,18 +22,23 @@ const TaskList = () => {
 
   const fetchTasks = async () => {
     try {
-      setError('');
-      const response = await axios.get(`${API_URL}/tasks`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      setError('');      const response = await axiosInstance.get('/tasks');
       setTasks(response.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       setError(error.response?.data?.message || 'Failed to fetch tasks. Please try again.');
       setLoading(false);
+    }
+  };
+
+  const fetchMeetings = async () => {
+    try {
+      const response = await axiosInstance.get('/meetings');
+      setMeetings(response.data);
+    } catch (error) {
+      console.error('Error fetching meetings:', error);
+      setError('Failed to fetch meetings');
     }
   };
 
@@ -45,11 +51,12 @@ const TaskList = () => {
       case 'tasks':
         navigate('/tasks');
         break;
-      case 'settings':
-        // Add settings route when implemented
+      case 'meetings':
+        navigate('/meetings');
         break;
-      case 'profile':
-        // Add profile route when implemented
+      case 'analytics':
+        // Stay on the same page but show analytics view
+        setActiveMenu('analytics');
         break;
       default:
         break;
@@ -80,6 +87,12 @@ const TaskList = () => {
         return tasks;
     }
   };
+
+  useEffect(() => {
+    if (activeMenu === 'meetings') {
+      fetchMeetings();
+    }
+  }, [activeMenu]);
 
   if (loading) {
     return <div className="loading">Loading tasks...</div>;
@@ -113,50 +126,67 @@ const TaskList = () => {
             <FaTasks /> Tasks
           </button>
           <button 
-            className={`menu-item ${activeMenu === 'settings' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('settings')}
+            className={`menu-item ${activeMenu === 'meetings' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('meetings')}
           >
-            <FaCog /> Settings
+            <FaBell /> Meetings
           </button>
           <button 
-            className={`menu-item ${activeMenu === 'profile' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('profile')}
+            className={`menu-item ${activeMenu === 'analytics' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('analytics')}
           >
-            <FaUserCircle /> Profile
+            <FaChartBar /> Analytics
           </button>
         </div>
       </div>
 
       <div className="dashboard-main">
-        <div className="tasks-header">
-          <h2>Task Management</h2>
-          <div className="task-filters">
-            <button 
-              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              All Tasks
-            </button>
-            <button 
-              className={`filter-btn ${filter === 'today' ? 'active' : ''}`}
-              onClick={() => setFilter('today')}
-            >
-              Today
-            </button>
-            <button 
-              className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`}
-              onClick={() => setFilter('upcoming')}
-            >
-              Upcoming
-            </button>
-            <button 
-              className={`filter-btn ${filter === 'past' ? 'active' : ''}`}
-              onClick={() => setFilter('past')}
-            >
-              Past
-            </button>
+        {activeMenu === 'meetings' ? (
+          <div className="meetings-section">
+            <h2>Meetings</h2>
+            {meetings.map(meeting => (
+              <div key={meeting._id} className="meeting-card">
+                <h3>{meeting.title}</h3>
+                <p>{meeting.description}</p>
+                <div className="meeting-meta">
+                  <span><FaCalendarAlt /> {new Date(meeting.date).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : activeMenu === 'analytics' ? (
+          <Analytics tasks={tasks} />
+        ) : (
+          <div className="tasks-header">
+            <h2>Task Management</h2>
+            <div className="task-filters">
+              <button 
+                className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                onClick={() => setFilter('all')}
+              >
+                All Tasks
+              </button>
+              <button 
+                className={`filter-btn ${filter === 'today' ? 'active' : ''}`}
+                onClick={() => setFilter('today')}
+              >
+                Today
+              </button>
+              <button 
+                className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`}
+                onClick={() => setFilter('upcoming')}
+              >
+                Upcoming
+              </button>
+              <button 
+                className={`filter-btn ${filter === 'past' ? 'active' : ''}`}
+                onClick={() => setFilter('past')}
+              >
+                Past
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="task-status-columns">
           <div className="task-column">
@@ -198,4 +228,4 @@ const TaskList = () => {
   );
 };
 
-export default TaskList; 
+export default TaskList;

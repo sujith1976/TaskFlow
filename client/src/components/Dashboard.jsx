@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { 
-  FaChartLine, FaCog, FaUserCircle, FaPlus,
+  FaChartLine, FaChartBar, FaUserCircle, FaPlus,
   FaEdit, FaTrash, FaTasks, FaVideo,
-  FaBell, FaSearch, FaArrowUp, FaArrowDown
+  FaBell, FaSearch, FaCalendarAlt
 } from 'react-icons/fa';
 import './Dashboard.css';
 import MeetingForm from './MeetingForm';
-import config from '../config/config';
-
-const API_BASE_URL = config.apiUrl;
+import Analytics from './Analytics';
+import axiosInstance from '../config/axios';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -21,8 +19,6 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showMeetingForm, setShowMeetingForm] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState('up');
 
   useEffect(() => {
     if (activeMenu === 'meetings') {
@@ -30,33 +26,16 @@ const Dashboard = () => {
     } else {
       fetchTasks();
     }
+    // Log initial render
+    console.log('Dashboard mounted, activeMenu:', activeMenu);
   }, [activeMenu]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const pageHeight = document.documentElement.scrollHeight;
-      const viewportHeight = window.innerHeight;
-      
-      // Show button when page is scrolled more than 300px
-      setShowScrollButton(scrollY > 300);
-      
-      // Determine scroll direction based on position
-      setScrollDirection(scrollY > pageHeight - viewportHeight - 100 ? 'up' : 'down');
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const fetchTasks = async () => {
     try {
       setError('');
-      const response = await axios.get(`${API_BASE_URL}/tasks`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      console.log('Fetching tasks...');
+      const response = await axiosInstance.get('/tasks');
+      console.log('Tasks response:', response.data);
       setTasks(response.data);
       setLoading(false);
     } catch (error) {
@@ -69,11 +48,9 @@ const Dashboard = () => {
   const fetchMeetings = async () => {
     try {
       setError('');
-      const response = await axios.get(`${API_BASE_URL}/meetings`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      console.log('Fetching meetings...');
+      const response = await axiosInstance.get('/meetings');
+      console.log('Meetings response:', response.data);
       setMeetings(response.data);
       setLoading(false);
     } catch (error) {
@@ -81,22 +58,18 @@ const Dashboard = () => {
       setError(error.response?.data?.message || 'Failed to fetch meetings');
       setLoading(false);
     }
-  };
-
-  const handleMenuClick = (menu) => {
+  };  const handleMenuClick = (menu) => {
     setActiveMenu(menu);
     if (menu === 'tasks') {
-      navigate('/tasks/new');
+      navigate('/tasks');
+    } else if (menu === 'analytics') {
+      fetchTasks(); // Ensure we have the latest task data for analytics
     }
   };
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await axios.delete(`${API_BASE_URL}/tasks/${taskId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await axiosInstance.delete(`/tasks/${taskId}`);
       setTasks(tasks.filter(task => task._id !== taskId));
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -110,14 +83,7 @@ const Dashboard = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/tasks/${taskId}`, 
-        { status: newStatus },
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      const response = await axiosInstance.put(`/tasks/${taskId}`, { status: newStatus });
       setTasks(tasks.map(task => 
         task._id === taskId ? response.data : task
       ));
@@ -129,11 +95,7 @@ const Dashboard = () => {
 
   const handleMeetingSubmit = async (meetingData) => {
     try {
-      await axios.post(`${API_BASE_URL}/meetings`, meetingData, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await axiosInstance.post('/meetings', meetingData);
       setShowMeetingForm(false);
       fetchMeetings();
     } catch (error) {
@@ -144,11 +106,7 @@ const Dashboard = () => {
 
   const handleDeleteMeeting = async (meetingId) => {
     try {
-      await axios.delete(`${API_BASE_URL}/meetings/${meetingId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await axiosInstance.delete(`/meetings/${meetingId}`);
       fetchMeetings();
     } catch (error) {
       console.error('Error deleting meeting:', error);
@@ -228,13 +186,6 @@ const Dashboard = () => {
     );
   };
 
-  const scrollToPosition = (direction) => {
-    window.scrollTo({
-      top: direction === 'up' ? 0 : document.documentElement.scrollHeight,
-      behavior: 'smooth'
-    });
-  };
-
   if (loading) {
     return <div className="loading">Loading dashboard...</div>;
   }
@@ -263,12 +214,11 @@ const Dashboard = () => {
             onClick={() => handleMenuClick('meetings')}
           >
             <FaBell /> Meetings
-          </button>
-          <button 
-            className={`menu-item ${activeMenu === 'settings' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('settings')}
+          </button>          <button 
+            className={`menu-item ${activeMenu === 'analytics' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('analytics')}
           >
-            <FaCog /> Settings
+            <FaChartBar /> Analytics
           </button>
         </div>
       </div>
@@ -309,10 +259,10 @@ const Dashboard = () => {
             <h3>Pending</h3>
             <p className="stat-value">{tasksByStatus.todo.length}</p>
           </div>
-        </div>
-
-        {activeMenu === 'meetings' ? (
+        </div>        {activeMenu === 'meetings' ? (
           renderMeetings()
+        ) : activeMenu === 'analytics' ? (
+          <Analytics tasks={tasks} />
         ) : (
           <div className="task-board">
             <div className="board-column">
@@ -448,27 +398,12 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-      </div>
-
-      {showMeetingForm && (
+      </div>      {showMeetingForm && (
         <MeetingForm
           onClose={() => setShowMeetingForm(false)}
           onSubmit={handleMeetingSubmit}
         />
       )}
-
-      <div className="scroll-nav-wrapper">
-        <button 
-          className={`scroll-nav-button ${showScrollButton ? 'show' : ''}`}
-          onClick={() => scrollToPosition(scrollDirection)}
-          aria-label={`Scroll to ${scrollDirection === 'up' ? 'top' : 'bottom'}`}
-        >
-          {scrollDirection === 'up' ? <FaArrowUp /> : <FaArrowDown />}
-        </button>
-        <div className="scroll-nav-label">
-          {scrollDirection === 'up' ? 'Back to top' : 'Go to bottom'}
-        </div>
-      </div>
     </div>
   );
 };

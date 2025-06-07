@@ -13,7 +13,7 @@ const authenticateToken = async (req, res, next) => {
             throw new Error('No authorization header');
         }
         const token = authHeader.replace('Bearer ', '');
-        const decoded = jsonwebtoken_1.default.verify(token, 'your_jwt_secret');
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'default_secret');
         const user = await user_model_1.default.findOne({ _id: decoded.userId });
         if (!user) {
             throw new Error('User not found');

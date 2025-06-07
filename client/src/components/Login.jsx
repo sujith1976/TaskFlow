@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../config/axios';
+import { endpoints } from '../config/api';
 import './Login.css';
 
 const Login = () => {
@@ -21,15 +22,27 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      setError('');
+      console.log('Attempting login...');
+      const response = await axiosInstance.post('/auth/login', {
         email: formData.email,
         password: formData.password
       });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.user._id);
-      navigate('/dashboard');
+
+      console.log('Login response:', response.data);
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.user._id);
+        // Set the token in axiosInstance defaults
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        console.log('Login successful, navigating to dashboard...');
+        navigate('/dashboard');
+      } else {
+        setError('Invalid response from server');
+      }
     } catch (error) {
-      setError('Invalid email or password');
+      console.error('Login error:', error);
+      setError(error.response?.data?.message || 'Failed to login. Please check your credentials.');
     }
   };
 
@@ -73,4 +86,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

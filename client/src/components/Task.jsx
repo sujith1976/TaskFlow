@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../config/axios';
 import './Task.css';
-import { API_URL } from '../config/api';
 
 const Task = ({ task, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -11,14 +10,9 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleStatusChange = async (newStatus) => {
     try {
       setError('');
-      const response = await axios.put(`${API_URL}/tasks/${task._id}`, {
+      const response = await axiosInstance.put(`/tasks/${task._id}`, {
         ...task,
         status: newStatus
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
       });
       onUpdate(response.data);
     } catch (error) {
@@ -30,21 +24,13 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleSave = async () => {
     try {
       setError('');
-      const response = await axios.put(`${API_URL}/tasks/${task._id}`, 
-        {
-          title: editedTask.title,
-          description: editedTask.description,
-          dueDate: editedTask.dueDate,
-          priority: editedTask.priority,
-          status: editedTask.status
-        }, 
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axiosInstance.put(`/tasks/${task._id}`, {
+        title: editedTask.title,
+        description: editedTask.description,
+        dueDate: editedTask.dueDate,
+        priority: editedTask.priority,
+        status: editedTask.status
+      });
       onUpdate(response.data);
       setIsEditing(false);
     } catch (error) {
@@ -56,11 +42,7 @@ const Task = ({ task, onUpdate, onDelete }) => {
   const handleDelete = async () => {
     try {
       setError('');
-      await axios.delete(`${API_URL}/tasks/${task._id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await axiosInstance.delete(`/tasks/${task._id}`);
       onDelete(task._id);
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -173,4 +155,4 @@ const Task = ({ task, onUpdate, onDelete }) => {
   );
 };
 
-export default Task; 
+export default Task;
