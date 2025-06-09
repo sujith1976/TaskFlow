@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { endpoints } from '../config/api';
+import axiosInstance from '../config/axios';
 import './Signup.css';
 
 const Signup = () => {
@@ -18,48 +18,59 @@ const Signup = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setError(''); // Clear error when user makes changes
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match!');
       return;
     }
 
     try {
-      const response = await fetch(endpoints.signup, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      console.log('Attempting signup...');
+      const response = await axiosInstance.post('/auth/signup', {
+        username: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
+      console.log('Signup successful:', response.data);
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      if (response.data.token) {
+        // Store user data and token
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify({
+          id: response.data.userId,
+          username: response.data.user.username,
+          email: response.data.user.email,
+        }));
+
+        // Set token for future requests
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+        // Redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        setError('Registration successful but no token received');
       }
-
-      // Store the token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({
-        id: data._id,
-        name: data.name,
-        email: data.email,
-      }));
-
-      // Redirect to dashboard
-      navigate('/dashboard');
     } catch (error) {
-      setError(error.message);
+      console.error('Signup error:', error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        setError(error.response.data.error || error.response.data.message || 'Registration failed');
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError('No response from server. Please try again.');
+      } else {
+        // Something happened in setting up the request
+        setError('An error occurred. Please try again.');
+      }
     }
   };
 
@@ -67,7 +78,7 @@ const Signup = () => {
     <div className="signup-container">
       <div className="signup-card">
         <h2>Create Account</h2>
-        <p className="subtitle">Join us to manage your finances better</p>
+        <p className="subtitle">Join TaskFlow to manage your tasks better</p>
         {error && <p className="error-message">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -80,6 +91,7 @@ const Signup = () => {
               onChange={handleChange}
               placeholder="Enter your full name"
               required
+              minLength={3}
             />
           </div>
           <div className="form-group">
@@ -104,6 +116,7 @@ const Signup = () => {
               onChange={handleChange}
               placeholder="Create a password"
               required
+              minLength={6}
             />
           </div>
           <div className="form-group">
@@ -130,4 +143,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default Signup;

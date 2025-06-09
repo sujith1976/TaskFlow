@@ -20,7 +20,12 @@ const loginSchema = z.object({
 });
 
 // Routes
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+// Support both /register and /signup for backward compatibility
+router.post('/register', handleRegistration);
+router.post('/signup', handleRegistration);
+
+// Extract registration logic to a reusable function
+async function handleRegistration(req: Request, res: Response): Promise<void> {
   try {
     const { username, email, password } = registerSchema.parse(req.body);
     
@@ -58,7 +63,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     console.error('Registration error:', error);
     res.status(400).json({ error: 'Invalid input data' });
   }
-});
+}
 
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -96,4 +101,4 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-export default router; 
+export default router;

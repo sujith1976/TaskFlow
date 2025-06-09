@@ -23,16 +23,14 @@ const Login = () => {
     e.preventDefault();
     try {
       setError('');
-      console.log('Attempting login...');
-      const response = await axiosInstance.post('/auth/login', {
+      console.log('Attempting login...');      const response = await axiosInstance.post(endpoints.login, {
         email: formData.email,
         password: formData.password
       });
 
-      console.log('Login response:', response.data);
-      if (response.data && response.data.token) {
+      console.log('Login response:', response.data);      if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userId', response.data.user._id);
+        localStorage.setItem('userId', response.data.userId || response.data.user?._id);
         // Set the token in axiosInstance defaults
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         console.log('Login successful, navigating to dashboard...');
