@@ -7,6 +7,15 @@ import User from '../models/user.model';
 
 const router = express.Router();
 
+// Add CORS headers middleware for auth routes
+router.use((req: Request, res: Response, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
 // Validation schemas
 const registerSchema = z.object({
   username: z.string().min(3).max(50),
